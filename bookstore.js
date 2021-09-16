@@ -1,4 +1,4 @@
-export default function createBookstore(document) {
+export default function createBookstore() {
 
     // aplicando (de forma hardcode) os livros sugeridos pelo desafio
     const bookstore = {
@@ -39,6 +39,16 @@ export default function createBookstore(document) {
             }
         }
     };
+
+    const observers = [];
+
+    function subscribe(observerFunction) {
+        observers.push(observerFunction);
+    }
+
+    function notifyAll(data) {
+        observers.forEach(observerFunction => observerFunction(data));
+    }
 
     /**
      * Retorna todo o objeto da livraria (apenas para visualização), incluindo todas categorias e todos os livros de
@@ -171,6 +181,7 @@ export default function createBookstore(document) {
             displayName: categoryName,
             bookself: []
         };
+        notifyAll({ command: 'category-add', data: { categoryId, categoryName } });
     }
 
     /**
@@ -178,6 +189,7 @@ export default function createBookstore(document) {
      */
     function removeCategory(categoryId) {
         delete bookstore.categories[categoryId];
+        notifyAll({ command: 'category-remove', data: { categoryId } });
     }
 
     /**
@@ -195,6 +207,7 @@ export default function createBookstore(document) {
         if(category) {
             category.bookself = category.bookself.concat(books);
         }
+        notifyAll({ command: 'add-books', data: { categoryId, books: [...books] } });
     }
 
     /**
@@ -208,6 +221,7 @@ export default function createBookstore(document) {
                 category.bookself.splice(index, 1);
             }
         }
+        notifyAll({ command: 'remove-book', data: { categoryId, bookTitle } });
     }
 
     /**
@@ -230,6 +244,7 @@ export default function createBookstore(document) {
                 category.bookself.splice(index, 1);
             }
         }
+        notifyAll({ command: 'remove-book', data: { categoryId, bookIndex: index } });
     }
 
     /**
@@ -281,7 +296,8 @@ export default function createBookstore(document) {
         hasBook,
         removeBookOfIndex,
         getBookOfIndex,
-        getIndexOfBook
+        getIndexOfBook,
+        subscribe,
     }
 
 } 

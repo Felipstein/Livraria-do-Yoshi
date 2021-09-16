@@ -3,15 +3,161 @@
     <head>
         <meta charset="utf-8">
         <title>Livraria do Yoshi</title>
+        <link rel="stylesheet" href="style.css">
     </head>
     <body>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
         <script type="module">
             import createBookstore from './bookstore.js';
-            
-            const bookstore = createBookstore();
 
-            
+            const lib = createBookstore();
+
+            renderAllBooks();
+
+            var varSearchEnabled = false;
+
+            $('#search-books').click(() => {
+                
+                searchBooks();
+
+            });
+
+            $('#book-search').on('input', () => {
+
+                const value = $('#book-search').val();
+
+                if(!!value) {
+                    searchEnabled(true);
+                } else {
+                    searchEnabled(false);
+                }
+
+            });
+
+            $('#book-search').on('keypress', (event) => {
+                if(event.keyCode === 13) {
+                    searchBooks();
+                }
+            });
+
+            function searchEnabled(enabled) {
+                varSearchEnabled = enabled;
+                if(enabled) {
+                    $('#search-books').css('color', '#eee');
+                    $('#search-books').css('cursor', 'pointer');
+                } else {
+                    $('#search-books').css('color', '#aaa');
+                    $('#search-books').css('cursor', 'default');
+                }
+            }
+
+            $('#clear-search').click(() => {
+                $('#book-search').val(null);
+                typeBackgroundColor = 0;
+                searchEnabled(false);
+                clearBooks();
+                renderAllBooks();
+            });
+
+            var typeBackgroundColor = 0;
+
+            function searchBooks() {
+                if(!varSearchEnabled) {
+                    return;
+                }
+
+                const search = prepareString($('#book-search').val());
+
+                const results = [];
+
+                lib.getAllBooks().forEach((book) => {
+                    const title = prepareString(book.title);
+                    const author = prepareString(book.author);
+                    const categoryName = prepareString(book.categoryName);
+
+                    if(title.includes(search)) {
+                        results.push(book);
+                    }
+
+                    if(author.includes(search)) {
+                        results.push(book);
+                    }
+
+                    if(categoryName.includes(search)) {
+                        results.push(book);
+                    }
+
+                });
+
+                clearBooks();
+                if(results.length == 0) {
+                    $('#books-list').append(`
+                        <div class="not-found">
+                            <p>Nenhum livro encontrado</p>
+                            <div class="underline"></div>
+                        </div>
+                    `);
+                    $('.not-found').hover(() => {
+                        const element = $('.underline');
+                        element.css('transition', '.8s');
+                        element.css('width', '37%');
+                    });
+                    $('.not-found').mouseleave(() => {
+                        const element = $('.underline');
+                        element.css('width', '0');
+                    }); 
+                } else {
+                    results.forEach(book => renderBook(book));
+                }
+            }
+
+            function clearBooks() {
+                $('#books-list').empty();
+            }
+
+            function renderAllBooks() {
+                lib.getAllBooks().forEach(book => renderBook(book));
+            }
+
+            function renderBook(book) {
+
+                const title = book.title;
+                const author = book.author;
+                const categoryName = book.categoryName;
+                    
+                const id = title.replaceAll(' ', '-').replaceAll(':', '-');
+
+                $('#books-list').append(`
+                    <div class="book-element" id="book-element-${id}">
+                        <p class="title">${title}</p>
+                        <p class="category">Categoria: ${author}</p>
+                        <p class="author">Autor: ${categoryName}</p>
+                    </div>
+                `);
+
+                if(typeBackgroundColor) {
+                    $(`#book-element-${id}`).css('background-color', '#eee');
+                    typeBackgroundColor = 0;
+                } else {
+                    $(`#book-element-${id}`).css('background-color', '#ccc');
+                    typeBackgroundColor = 1;
+                }
+
+            }
+
+            function prepareString(string) {
+                return string.toLowerCase().replace('ç', 'c').replace('ã', 'a').replace('é', 'e').replace('á', 'a').replace('ó', 'o').replace('õ', 'o').replace('í', 'i').replace('ñ', 'n').replace('â', 'a').replace('ê', 'e').replace('î', 'i').replace('ô', 'o').replace('û', 'u');
+            }
 
         </script>
+        <header id="top">
+            <input type="text" id="book-search" placeholder="Buscar por autor, título, categoria, elementos do texto...">
+            <p class="top-logon" id="search-books">BUSCAR LIVRO</p>
+            <p class="top-logon" id="clear-search">LIMPAR BUSCA</p>
+        </header>
+        <section id="books-section">
+            <section id="books-list">
+            </section>
+        </section>
     </body>
 </html>
