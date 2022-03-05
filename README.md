@@ -1,2 +1,2 @@
 # Livraria do Yoshi
-Desafio da mana :hear_no_evil::monkey:
+Livraria do Yoshi (Desafiado por um amigo) :hear_no_evil::monkey:
